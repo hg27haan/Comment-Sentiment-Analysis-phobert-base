@@ -9,6 +9,7 @@ import torch
 app = Flask(__name__)
 basedir = os.path.abspath(os.path.dirname(__file__))
 app.config['SECRET_KEY'] = 'f9b9a9f9c9b3e3e4a9b9c9d9e9f9a9b9'
+app.config['ADMIN_SECRET_CODE'] = 'admin123'  # Mã bí mật để đăng ký tài khoản quản trị viên
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'app.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -61,7 +62,7 @@ def index():
     return render_template('index.html', comments=user_comments)
 
 
-@app.route('/login', methods=['GET', 'POST'])
+@app.route("/login", methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
         return redirect(url_for('index'))
@@ -78,6 +79,42 @@ def login():
         else:
             flash('Tên đăng nhập hoặc mật khẩu không đúng.', 'danger')
     return render_template('login.html')
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+        password2 = request.form.get('password2')
+        admin_code = request.form.get('admin_code')
+
+        if password != password2:
+            flash('Mật khẩu không khớp.', 'danger')
+            return redirect(url_for('register'))
+        
+        existting_user = User.query.filter_by(username=username).first()
+        if existting_user:
+            flash('Tên đăng nhập đã tồn tại.', 'danger')
+            return redirect(url_for('register'))
+        
+        is_admin_code == False
+        if admin_code == app.config['ADMIN_SECRET_CODE']:
+            is_admin_code = True
+            flash('Bạn đã đăng ký với quyền quản trị viên.', 'success')
+        elif admin_code:
+            flash('Mã quản trị viên không đúng. Bạn sẽ được đăng ký với quyền người dùng thông thường.', 'warning')
+        new_user = User(username=username)
+        new_user.set_password(password)
+
+        db.session.add(new_user)
+        db.session.commit()
+
+        flash('Đăng ký thành công! Bạn có thể đăng nhập ngay bây giờ.', 'success')
+        return redirect(url_for('login'))
+    
+    return render_template('register.html')
 
 @app.route('/logout')
 @login_required

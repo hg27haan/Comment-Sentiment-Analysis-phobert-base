@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block title %}Trang chủ{% endblock %}
+{% block content %}
+<h2>Chào mừng, {{ current_user.username }}!</h2>
+<p>Hãy để lại bình luận của bạn về sản phẩm.</p>
+<form method="POST">
+    <div class="mb-3">
+        <textarea name="comment" class="form-control" rows="4" placeholder="Viết bình luận của bạn ở đây..."></textarea>
+    </div>
+    <button type="submit" class="btn btn-primary">Gửi bình luận</button>
+</form>
+<hr>
+<h3>Các bình luận của bạn</h3>
+<ul class="list-group">
+    {% for comment in comments %}
+    <li class="list-group-item d-flex justify-content-between align-items-center">
+        {{ comment.text }}
+        <span class="badge bg-secondary">{{ comment.sentiment }}</span>
+    </li>
+    {% else %}
+    <li class="list-group-item">Bạn chưa có bình luận nào.</li>
+    {% endfor %}
+</ul>
+{% endblock %}

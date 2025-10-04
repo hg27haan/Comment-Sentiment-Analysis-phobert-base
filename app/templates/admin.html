@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block title %}Admin Dashboard{% endblock %}
+{% block content %}
+<h1>Admin Dashboard</h1>
+<p>Danh sách tất cả bình luận từ người dùng.</p>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Người dùng</th>
+            <th>Bình luận</th>
+            <th>Kết quả Phân tích</th>
+            <th>Hành động</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for comment in comments %}
+        <tr>
+            <td>{{ comment.id }}</td>
+            <td>{{ comment.author.username }}</td>
+            <td>{{ comment.text }}</td>
+            <td>
+                {% if 'Tích cực' in comment.sentiment %}
+                    <span class="badge bg-success">{{ comment.sentiment }}</span>
+                {% elif 'Tiêu cực' in comment.sentiment %}
+                    <span class="badge bg-danger">{{ comment.sentiment }}</span>
+                {% elif 'Trung tính' in comment.sentiment %}
+                    <span class="badge bg-warning text-dark">{{ comment.sentiment }}</span>
+                {% else %}
+                    <span class="badge bg-secondary">{{ comment.sentiment }}</span>
+                {% endif %}
+            </td>
+            <td>
+                <a href="{{ url_for('predict', comment_id=comment.id) }}" class="btn btn-sm btn-info">Phân tích</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}  
